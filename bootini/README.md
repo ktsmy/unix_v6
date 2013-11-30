@@ -1,10 +1,13 @@
 Unix v6 (PDP-11) on SIMH
 ========================
 
-See http://gunkies.org/wiki/Installing_Unix_v6_%28PDP-11%29_on_SIMH
+http://gunkies.org/wiki/Installing_Unix_v6_%28PDP-11%29_on_SIMH にしたがってやればいい。  
+ここでは、bootするときにいちいち手で入力すると間違うし面倒くさいので、bootのところだけ設定ファイルにしてある。  
+と言っても最初の数行だけなのであんまり意味ない。
 
-# Setup SIMH
-See http://simh.trailing-edge.com/
+Setup SIMH
+-----------
+http://simh.trailing-edge.com/ からダウンロードしてビルド。
 
     $ wget http://simh.trailing-edge.com/sources/simhv39-0.zip
     $ unzip simhv39-0.zip -d simh
@@ -12,29 +15,35 @@ See http://simh.trailing-edge.com/
     $ make all
     $ cd ..
 
-./simh/BIN/pdp11 (and all other executables) is created.
+ビルドが成功すると```./simh/BIN/pdp11```（および他の実行ファイルすべて）ができる。
 
-# get Unix v6 tape
-From http://sourceforge.net/projects/bsd42/files/Install%20tapes/Research%20Unix/
+Get Unix v6 tape
+----------------
+http://sourceforge.net/projects/bsd42/files/Install%20tapes/Research%20Unix/ からダウンロードしてくる。
+解凍して、ファイル名をiniに書いてある名前に合わせて変える。
 
     $ wget http://jaist.dl.sourceforge.net/project/bsd42/Install%20tapes/Research%20Unix/Unix-v6-Ken-Wellsch.tap.bz2
     $ bunzip2 Unix-v6-Ken-Wellsch.tap.bz2
     $ mv Unix-v6-Ken-Wellsch.tap dist.tap
 
-# Install Unix v6 on SIMH
-1. Tape boot
-Boot with tboot.ini
+Install Unix v6 on SIMH
+-----------------------
+###Tape boot
+[tboot.ini](https://github.com/ktsmy/unix_v6/blob/master/bootini/tboot.ini)でbootする。
 
     $ ./simh/BIN/pdp11 tboot.ini
 
-Output example:
+実行すると、
 
     PDP-11 simulator V3.9-0
     Disabling XQ
     RK: creating new file
     RK: creating new file
     RK: creating new file
-[hit Ctrl+E]
+
+と出力されてここで固まるのでCtrl+Eを入力。  
+以降は手で入力していく。以下では、出力されるものと自分で入力するものを全部一緒に書いてある。やってみれば分かるはず。
+
     Simulation stopped, PC: 100012 (BR 100012)
     sim> g 0
     =tmrk
@@ -51,24 +60,25 @@ Output example:
     101
     count
     3999
-    = [hit Ctrl+E]
+    =
+                                                       [Ctrl+Eを入力]
     Simulation stopped, PC: 137274 (TSTB @#177560)
     sim> q
     Goodbye
 
-2. Disk install
-Boot with tboot.ini
+### Disk install
+[dboot.ini](https://github.com/ktsmy/unix_v6/blob/master/bootini/dboot.ini)でbootする。
 
     $ ./simh/BIN/pdp11 dboot.ini
 
-Output example:
+以降、ひたすら手で入力していく。何やってるかは[元の説明](http://gunkies.org/wiki/Installing_Unix_v6_%28PDP-11%29_on_SIMH#disk_install)を参照。
 
     PDP-11 simulator V3.9-0
     Disabling XQ
     @rkunix
     mem = 1035
     RESTRICTED RIGHTS
-    
+        
     Use, duplication or disclosure is subject to
     restrictions stated in Contract with Western
     Electric Company, Inc.
@@ -124,7 +134,7 @@ Output example:
     # cat >> /etc/rc
     /etc/mount /dev/rk1 /usr/source
     /etc/mount /dev/rk2 /usr/doc
-    [hit Ctrl+D]
+                                                       [Ctrl+Dを入力]
     # chdir /usr/source/s1
     # ed df.c
     1282
@@ -184,16 +194,17 @@ Output example:
     # sync
     # sync
     # sync
-    # [hit Ctrl+E]
+    #                                                  [Ctrl+Eを入力]
     Simulation stopped, PC: 002502 (MOV (SP)+,177776)
     sim> q
     Goodbye
     
-3. After disk install, you can boot normally with boot.ini
+### Normal boot
+disk installが終わったら、[boot.ini](https://github.com/ktsmy/unix_v6/blob/master/bootini/boot.ini)で普通にbootできるようになる。
     
     $ ./simh/BIN/pdp11 boot.ini
 
-Then, Unix v6 will boot as following:
+実行すると以下のようになる。rootでパスワードなしでloginできる。
 
     PDP-11 simulator V3.9-0
     Disabling XQ
@@ -204,3 +215,11 @@ Then, Unix v6 will boot as following:
     login: root
     #
  
+ちなみにkenってユーザも最初からいるようではある。
+
+    # cat /etc/passwd
+    root::0:3::/:
+    daemon::1:1::/:
+    bin::3:3::/bin:
+    ken::6:1::/usr/ken:
+
